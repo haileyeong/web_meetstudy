@@ -1,15 +1,21 @@
 package com.elice.meetstudy.domain.comment.domain;
 
+import com.elice.meetstudy.domain.comment.dto.CommentEditor;
 import com.elice.meetstudy.domain.post.domain.Post;
 import com.elice.meetstudy.domain.user.domain.User;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 /**
  *  comment Entity
  */
 @Entity
-@Table(name = "comment")
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Comment {
 
   @Id
@@ -29,5 +35,20 @@ public class Comment {
 
   @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
   private LocalDateTime createdAt;
+
+  @Builder
+  public Comment(Post post, User user, String content) {
+    this.post = post;
+    this.user = user;
+    this.content = content;
+  }
+
+  public CommentEditor.CommentEditorBuilder toEditor() {
+    return CommentEditor.builder().content(this.content);
+  }
+
+  public void edit(CommentEditor commentEditor) {
+    this.content = commentEditor.getContent();
+  }
 
 }
