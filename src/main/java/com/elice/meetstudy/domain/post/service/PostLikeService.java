@@ -19,7 +19,6 @@ public class PostLikeService {
   private final PostLikeRepository postLikeRepository;
   private final EntityFinder entityFinder;
 
-  // 게시글 좋아요
   public boolean insert(Long postId) {
     Post post = entityFinder.findPost(postId);
     Optional<PostLike> postLike = entityFinder.findLike(post.getId());
@@ -32,12 +31,10 @@ public class PostLikeService {
     return true;
   }
 
-  // 게시글 좋아요 취소 - (이미 취소했어도 204)
   public void delete(Long postId) {
     postLikeRepository.deleteByUserIdAndPostId(entityFinder.getUser().getId(), postId);
   }
 
-  // 게시글 좋아요 수 조회
   public Long getLikeNumByPost(Long postId) {
     return postLikeRepository.countByPostId(postId);
   }

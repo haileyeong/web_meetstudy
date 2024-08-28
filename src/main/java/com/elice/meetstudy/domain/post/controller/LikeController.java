@@ -22,7 +22,6 @@ public class LikeController {
 
   private final PostLikeService postLikeServicee;
 
-  // 게시글 좋아요 (GET)
   @Operation(
       summary = "게시글 좋아요",
       description = "(회원 권한) 게시글에 있는 버튼을 누르면 좋아요가 추가(true). 이미 좋아요한 게시글이면 (false)")
@@ -32,7 +31,6 @@ public class LikeController {
     return ResponseEntity.ok().body(likeInserted);
   }
 
-  // 게시글 좋아요 취소 (DELETE)
   @Operation(
       summary = "좋아요한 게시글 취소 - (이미 취소했어도 204)",
       description = "(회원 권한) 이미 좋아요한 게시글에서 버튼을 다시 누르면 좋아요가 취소됩니다.")
@@ -42,8 +40,6 @@ public class LikeController {
     return ResponseEntity.noContent().build();
   }
 
-  // 게시글 좋아요 수 조회 (GET)
-  // countByPostId
   @Operation(
       summary = "특정 게시글의 좋아요 수 조회 (숫자로 반환)",
       description = "(권한 불필요) 게시글이 받은 좋아요 수를 확인할 수 있습니다. 값은 숫자로 반환됩니다!")
