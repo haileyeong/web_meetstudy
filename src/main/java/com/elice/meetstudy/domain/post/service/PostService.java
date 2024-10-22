@@ -2,6 +2,7 @@ package com.elice.meetstudy.domain.post.service;
 
 import com.elice.meetstudy.domain.category.entity.Category;
 import com.elice.meetstudy.domain.post.domain.Post;
+import com.elice.meetstudy.domain.post.domain.QPost;
 import com.elice.meetstudy.domain.post.dto.PostEditDTO;
 import com.elice.meetstudy.domain.post.dto.PostResponseDTO;
 import com.elice.meetstudy.domain.post.dto.PostWriteDTO;
@@ -9,6 +10,7 @@ import com.elice.meetstudy.domain.post.repository.PostRepository;
 import com.elice.meetstudy.domain.studyroom.exception.EntityNotFoundException;
 import com.elice.meetstudy.domain.user.service.UserService;
 import com.elice.meetstudy.util.EntityFinder;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +31,7 @@ public class PostService {
   private final PostRepository postRepository;
   private final UserService userService;
   private final EntityFinder entityFinder;
+  private final JPAQueryFactory queryFactory;
 
   /** 게시글 작성 */
   public PostResponseDTO write(PostWriteDTO postCreate) {
@@ -150,11 +153,37 @@ public class PostService {
   }
 
   /** 전체 게시판 내 게시글 검색 */
+  //  public List<PostResponseDTO> searchPostInBoard(
+  //      Long categoryId, String keyword, int page, int size) {
+  //    Pageable defaultPageable = PageRequest.of(page, size, Sort.by(Direction.DESC, "createdAt"));
+  //    return postRepository.findByKeyword(categoryId, keyword, defaultPageable).stream()
+  //        .map(PostResponseDTO::new)
+  //        .collect(Collectors.toList());
+  //  }
+
+  // QueryDSL
   public List<PostResponseDTO> searchPostInBoard(
-      Long categoryId, String keyword, int page, int size) {
-    Pageable defaultPageable = PageRequest.of(page, size, Sort.by(Direction.DESC, "createdAt"));
-    return postRepository.findByKeyword(categoryId, keyword, defaultPageable).stream()
-        .map(PostResponseDTO::new)
+      Long categoryId, String keyword, Pageable pageable) {
+    QPost post = QPost.post;
+
+    List<Post> posts =
+        queryFactory
+            .selectFrom(post)
+            .where(
+                post.category
+                    .id
+                    .eq(categoryId)
+                    .and(
+                        post.title
+                            .containsIgnoreCase(keyword)
+                            .or(post.content.containsIgnoreCase(keyword))))
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .fetch();
+
+    // Post -> PostResponseDTO 변환
+    return posts.stream()
+        .map(PostResponseDTO::new) // PostResponseDTO로 변환
         .collect(Collectors.toList());
   }
 

@@ -9,6 +9,9 @@ import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -85,14 +88,27 @@ public class PostController {
     return ResponseEntity.ok(postService.getPost(postId));
   }
 
+  //  @Operation(summary = "특정 게시판 내 게시글 키워드 검색 - (최근 작성된 순으로)")
+  //  @GetMapping("/public/category/{categoryId}/search")
+  //  public ResponseEntity<List<PostResponseDTO>> searchPostInBoard(
+  //      @PathVariable Long categoryId,
+  //      @RequestParam String keyword,
+  //      @RequestParam(defaultValue = "0") int page,
+  //      @RequestParam(defaultValue = "15") int size) {
+  //    return ResponseEntity.ok(postService.searchPostInBoard(categoryId, keyword, page, size));
+  //  }
+
   @Operation(summary = "특정 게시판 내 게시글 키워드 검색 - (최근 작성된 순으로)")
   @GetMapping("/public/category/{categoryId}/search")
   public ResponseEntity<List<PostResponseDTO>> searchPostInBoard(
       @PathVariable Long categoryId,
       @RequestParam String keyword,
-      @RequestParam(defaultValue = "0") int page,
-      @RequestParam(defaultValue = "15") int size) {
-    return ResponseEntity.ok(postService.searchPostInBoard(categoryId, keyword, page, size));
+      @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC)
+          Pageable pageable) {
+    List<PostResponseDTO> searchResults =
+        postService.searchPostInBoard(categoryId, keyword, pageable);
+
+    return ResponseEntity.ok(searchResults);
   }
 
   @Operation(summary = "전체 게시판 내 게시글 키워드 검색 - (최근 작성된 순으로)")
